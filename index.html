@@ -1,385 +1,276 @@
 <!DOCTYPE html>
-<html lang="pl" class="dark">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sortowanie Dwustronnych PDF</title>
-    <!-- Tailwind CSS CDN for styling -->
+    <title>PDF Sorter - Quantum Edition</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Font - Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Google Font - Rajdhani for futuristic feel -->
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- pdf-lib CDN for PDF manipulation -->
+    <!-- Google Fonts: Orbitron & Rajdhani -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- pdf-lib CDN -->
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
-    <!-- Favicon / Logo for the browser tab -->
-    <link rel="icon" href="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo" type="image/png">
+    <!-- Favicon -->
+    <link rel="icon" href="Copilot_20250625_160448.jpg" type="image/jpeg">
     <style>
-        /* Base styles for dark mode */
+        /* --- FUTURISTIC THEME V2 --- */
+        :root {
+            --bg-color: #0D0C1D;
+            --primary-glow-color: #5f72ff;
+            --secondary-glow-color: #e66ebc;
+            --container-bg: rgba(15, 12, 41, 0.75);
+            --border-color: rgba(95, 114, 255, 0.2);
+            --hover-border-color: rgba(95, 114, 255, 0.6);
+            --text-color: #EAEBFF;
+            --text-muted-color: #A9A8C3;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        .dark body {
-            background-color: #0d1117; /* Dark background */
-            color: #c9d1d9; /* Light text */
+        /* Animated Gradient Background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(320deg, var(--bg-color), #211d42, var(--bg-color));
+            background-size: 200% 200%;
+            animation: gradient-animation 15s ease infinite;
+            z-index: 0;
         }
-
-        .dark .bg-white {
-            background-color: #161b22; /* Slightly lighter dark for card */
-            border: 1px solid #30363d;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .dark h1, .dark h2, .dark label {
-            color: #e6edf3;
-        }
-
-        .dark p {
-            color: #a7adba;
-        }
-
-        .dark .border-gray-200 {
-            border-color: #30363d;
-        }
-
-        .dark .border-gray-300 {
-            border-color: #30363d;
-        }
-
-        .dark .file-input-wrapper label {
-            background-color: #004d99; /* Darker blue for dark mode */
-            color: #e6edf3;
-        }
-        .dark .file-input-wrapper label:hover {
-            background-color: #005cb3;
-        }
-
-        .dark .drop-zone {
-            background-color: #0d1117; /* Darker background for drop zone */
-            border-color: #444c56;
-        }
-        .dark .drop-zone.drag-over {
-            border-color: #58a6ff !important;
-            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.5);
-        }
-        .dark .drop-zone p {
-            color: #8b949e;
-        }
-        .dark .drop-zone span {
-            color: #8b949e;
+        
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
 
-        /* Styles for light mode (overrides dark mode) */
-        .light body {
-            background-color: #f0f2f5; /* Light background */
-            color: #333; /* Dark text */
-        }
-        .light .bg-white {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .light h1, .light h2, .light label {
-            color: #222;
-        }
-        .light p {
-            color: #555;
-        }
-        .light .border-gray-200 {
-            border-color: #e0e0e0;
-        }
-        .light .border-gray-300 {
-            border-color: #ccc;
+        /* Main container with glassmorphism effect */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            background-color: var(--container-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(95, 114, 255, 0.1);
         }
 
-        .light .file-input-wrapper label {
-            background-color: #3b82f6; /* Standard blue for light mode */
+        /* Header styling */
+        .header-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--primary-glow-color), var(--secondary-glow-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(230, 110, 188, 0.3);
+        }
+        
+        #rs-projects-text {
+            font-family: var(--font-display);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--text-muted-color);
+        }
+
+        /* Card styling */
+        .method-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .method-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--hover-border-color);
+            box-shadow: 0 0 30px -5px var(--primary-glow-color);
+        }
+        .method-card h2 {
+            font-family: var(--font-display);
+            font-weight: 700;
+             background: linear-gradient(90deg, var(--primary-glow-color), var(--secondary-glow-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Drop Zone styling */
+        .drop-zone {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 2px dashed var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .drop-zone.drag-over, .drop-zone:hover {
+            border-color: var(--secondary-glow-color);
+            background-color: rgba(230, 110, 188, 0.1);
+            box-shadow: 0 0 15px rgba(230, 110, 188, 0.3);
+        }
+        
+        /* Button styling */
+        .action-button {
+            font-family: var(--font-display); /* Bold, futuristic font for buttons */
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             color: white;
+            border-radius: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            transition: all 0.3s ease;
+            border: none;
         }
-        .light .file-input-wrapper label:hover {
-            background-color: #2563eb;
+        
+        .primary-button {
+            background: linear-gradient(90deg, var(--primary-glow-color), var(--secondary-glow-color));
+            box-shadow: 0 0 10px rgba(95, 114, 255, 0.4), 0 0 10px rgba(230, 110, 188, 0.4);
         }
-
-        .light .drop-zone {
-            background-color: #ffffff;
-            border-color: #ccc;
+        .primary-button:not(:disabled):hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 20px rgba(95, 114, 255, 0.6), 0 0 20px rgba(230, 110, 188, 0.6);
         }
-        .light .drop-zone.drag-over {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
-        .light .drop-zone p {
-            color: #666;
-        }
-        .light .drop-zone span {
-            color: #666;
-        }
-
-        /* Common styles for buttons and elements */
-        button {
-            border-radius: 0.5rem; /* rounded-lg */
-            font-weight: 600; /* font-semibold */
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        button:disabled {
-            background-color: #4a5568 !important; /* bg-gray-600 for dark, gray-300 for light */
+        .primary-button:disabled {
+            background: #2a294b;
+            color: #6a6988;
             cursor: not-allowed;
             box-shadow: none;
         }
-        .dark button:disabled {
-            background-color: #333a42 !important;
-            color: #8b949e;
-        }
-        .light button:disabled {
-            background-color: #cbd5e0 !important;
-            color: #718096;
-        }
-
-        /* Specific button styles */
-        .primary-button {
-            background-color: #007bff; /* A vibrant blue */
-            color: white;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-        }
-        .primary-button:not(:disabled):hover {
-            background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
-        }
-
+        
         .success-button {
-            background-color: #28a745; /* A vibrant green */
+            background: linear-gradient(90deg, #10b981, #34d399);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+         .success-button:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
+        }
+
+        .file-label {
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            transition: background-color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .success-button:not(:disabled):hover {
-            background-color: #1e7e34;
-            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
-        }
-
-        /* RS Projects specific styling */
-        #rs-projects-text {
-            font-family: 'Rajdhani', sans-serif; /* Futuristic font */
-            font-size: 1.5rem; /* Larger font size */
-            font-weight: 700;
-            letter-spacing: 0.1em; /* Increased letter spacing */
-            margin-top: -5px; /* Adjust vertical alignment with logo */
-        }
-        .dark #rs-projects-text {
-            color: #00d4ff; /* Bright cyan for dark mode */
-            text-shadow: 0 0 8px rgba(0, 212, 255, 0.6); /* Subtle glow */
-        }
-        .light #rs-projects-text {
-            color: #007bff; /* Consistent blue for light mode */
-            text-shadow: none;
+        .file-label:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Theme toggle switch styling */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-            margin-left: auto; /* Push to the right */
-            margin-top: -10px; /* Adjust vertical position */
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #2196F3;
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px #2196F3;
-        }
-
-        input:checked + .slider:before {
-            -webkit-transform: translateX(26px);
-            -ms-transform: translateX(26px);
-            transform: translateX(26px);
-        }
-
-        /* Rounded sliders */
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
-        }
     </style>
 </head>
-<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl">
-        <div class="flex flex-col md:flex-row items-center justify-center mb-6 relative">
-            <div class="flex items-center justify-center md:mr-auto mb-4 md:mb-0">
-                <!-- Logo image -->
-                <img src="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo"
-                     alt="Logo"
-                     class="w-16 h-16 rounded-full mr-4 object-cover"
-                     onerror="this.onerror=null;this.src='https://placehold.co/64x64/cccccc/333333?text=Logo';"
-                >
-                <div class="flex flex-col items-center md:items-start">
-                    <h1 class="text-3xl font-bold text-center md:text-left text-gray-800">
-                        Sortowanie dwustronnych PDF
+<body class="p-4">
+    <div class="main-container w-full max-w-5xl">
+        <div class="text-center mb-8">
+             <div class="flex items-center justify-center gap-6 mb-4">
+                 <img src="Copilot_20250625_160448.jpg"
+                         alt="Logo RS Projects"
+                         class="w-20 h-20 rounded-full shadow-lg"
+                         style="box-shadow: 0 0 25px -5px var(--primary-glow-color), 0 0 15px -5px var(--secondary-glow-color);"
+                         onerror="this.onerror=null;this.src='https://placehold.co/80x80/0d0c1d/eaeebf?text=RS';">
+                <div>
+                     <h1 class="header-title text-4xl md:text-5xl">
+                        PDF Sorter
                     </h1>
-                    <span id="rs-projects-text" class="text-gray-700 mt-1">RS PROJECTS</span>
+                     <span id="rs-projects-text" class="text-lg">RS PROJECTS</span>
                 </div>
             </div>
-
-            <!-- Theme Toggle Switch -->
-            <label class="toggle-switch">
-                <input type="checkbox" id="theme-toggle">
-                <span class="slider round"></span>
-            </label>
+            <p class="text-lg max-w-2xl mx-auto font-semibold text-text-muted-color">
+                Zaawansowany system do synchronizacji dwustronnie skanowanych dokumentów. Wybierz protokół i załaduj pliki.
+            </p>
         </div>
 
-        <p class="text-gray-600 text-center mb-6">
-            Wybierz jedną z poniższych metod sortowania. Możesz także przeciągać i upuszczać pliki.
-        </p>
-
-        <div class="flex flex-col md:flex-row gap-6">
-            <!-- Sekcja sortowania dwóch plików PDF (Metoda A) -->
-            <div class="border border-gray-200 rounded-xl p-6 flex-1">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Metoda A: Dwa pliki PDF</h2>
-                <p class="text-gray-600 text-sm mb-4">
-                    Wgraj dwa pliki: jeden ze stronami nieparzystymi (po kolei) i drugi ze stronami parzystymi (od tyłu).
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Protokół Podwójny -->
+            <div class="method-card p-6 flex-1 flex flex-col">
+                <h2 class="text-2xl mb-4">Protokół Podwójny</h2>
+                <p class="text-sm mb-4 text-text-muted-color flex-grow font-semibold">
+                    Zainicjuj proces, dostarczając dwa oddzielne strumienie danych: frontowy (nieparzyste) i rewersowy (parzyste).
                 </p>
-
-                <div class="mb-4 file-input-wrapper">
-                    <label for="pdf1" class="block text-gray-700 text-sm font-semibold mb-2">
-                        Plik PDF 1 (strony nieparzyste, po kolei):
-                    </label>
-                    <div id="dropZonePdf1" class="drop-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
-                        <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
-                        <input
-                            type="file"
-                            id="pdf1"
-                            accept=".pdf"
-                            class="hidden"
-                        />
-                        <label for="pdf1" class="inline-block bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600 transition-colors duration-200">
-                            Wybierz plik
-                        </label>
-                        <span id="fileNamePdf1" class="block text-sm text-gray-600 mt-2"></span>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-300 uppercase tracking-wider">Strumień Frontowy</label>
+                        <div id="dropZonePdf1" class="drop-zone rounded-lg p-4 text-center cursor-pointer">
+                            <p class="text-sm text-text-muted-color mb-2 font-bold">STREFA ZRZUTU</p>
+                            <input type="file" id="pdf1" accept=".pdf" class="hidden"/>
+                            <label for="pdf1" class="file-label inline-block py-2 px-4 rounded-md cursor-pointer text-sm">
+                                Załaduj
+                            </label>
+                            <span id="fileNamePdf1" class="block text-xs text-text-muted-color mt-2 truncate"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-300 uppercase tracking-wider">Strumień Rewersowy</label>
+                        <div id="dropZonePdf2" class="drop-zone rounded-lg p-4 text-center cursor-pointer">
+                            <p class="text-sm text-text-muted-color mb-2 font-bold">STREFA ZRZUTU</p>
+                            <input type="file" id="pdf2" accept=".pdf" class="hidden"/>
+                            <label for="pdf2" class="file-label inline-block py-2 px-4 rounded-md cursor-pointer text-sm">
+                                Załaduj
+                            </label>
+                            <span id="fileNamePdf2" class="block text-xs text-text-muted-color mt-2 truncate"></span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="mb-6 file-input-wrapper">
-                    <label for="pdf2" class="block text-gray-700 text-sm font-semibold mb-2">
-                        Plik PDF 2 (strony parzyste, od tyłu):
-                    </label>
-                    <div id="dropZonePdf2" class="drop-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
-                        <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
-                        <input
-                            type="file"
-                            id="pdf2"
-                            accept=".pdf"
-                            class="hidden"
-                        />
-                        <label for="pdf2" class="inline-block bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600 transition-colors duration-200">
-                            Wybierz plik
-                        </label>
-                        <span id="fileNamePdf2" class="block text-sm text-gray-600 mt-2"></span>
-                    </div>
-                </div>
-
-                <button
-                    id="sortTwoFilesButton"
-                    disabled
-                    class="w-full py-3 px-4 primary-button"
-                >
-                    Sortuj dwa pliki PDF
+                <button id="sortTwoFilesButton" disabled class="w-full mt-6 action-button primary-button">
+                    Uruchom Synchronizację
                 </button>
             </div>
 
-            <!-- Sekcja sortowania jednego pliku PDF (Metoda B) -->
-            <div class="border border-gray-200 rounded-xl p-6 flex-1">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Metoda B: Jeden plik PDF</h2>
-                <p class="text-gray-600 text-sm mb-4">
-                    Wgraj jeden plik PDF, który zawiera strony nieparzyste (po kolei), a następnie strony parzyste (od tyłu).
+            <!-- Protokół Pojedynczy -->
+            <div class="method-card p-6 flex-1 flex flex-col">
+                <h2 class="text-2xl mb-4">Protokół Pojedynczy</h2>
+                <p class="text-sm mb-4 text-text-muted-color flex-grow font-semibold">
+                    Załaduj skonsolidowany pakiet danych. System automatycznie rozdzieli i posortuje strumienie.
                 </p>
-
-                <div class="mb-6 file-input-wrapper">
-                    <label for="singlePdf" class="block text-gray-700 text-sm font-semibold mb-2">
-                        Jeden plik PDF (scalony i do posortowania):
-                    </label>
-                    <div id="dropZoneSinglePdf" class="drop-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
-                        <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
-                        <input
-                            type="file"
-                            id="singlePdf"
-                            accept=".pdf"
-                            class="hidden"
-                        />
-                        <label for="singlePdf" class="inline-block bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600 transition-colors duration-200">
-                            Wybierz plik
-                        </label>
-                        <span id="fileNameSinglePdf" class="block text-sm text-gray-600 mt-2"></span>
+                 <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-300 uppercase tracking-wider">Pakiet Scalony</label>
+                        <div id="dropZoneSinglePdf" class="drop-zone rounded-lg p-4 text-center cursor-pointer h-[196px] flex flex-col justify-center">
+                             <p class="text-sm text-text-muted-color mb-2 font-bold">STREFA ZRZUTU</p>
+                            <input type="file" id="singlePdf" accept=".pdf" class="hidden"/>
+                            <label for="singlePdf" class="file-label inline-block py-2 px-4 rounded-md cursor-pointer text-sm">
+                                Załaduj
+                            </label>
+                            <span id="fileNameSinglePdf" class="block text-xs text-text-muted-color mt-2 truncate"></span>
+                        </div>
                     </div>
                 </div>
-
-                <button
-                    id="sortSingleFileButton"
-                    disabled
-                    class="w-full py-3 px-4 primary-button"
-                >
-                    Sortuj jeden plik PDF
+                <button id="sortSingleFileButton" disabled class="w-full mt-6 action-button primary-button">
+                    Uruchom Sortowanie
                 </button>
             </div>
         </div>
 
-        <!-- Obszar wiadomości i pobierania (wspólny dla obu metod) -->
-        <p id="errorMessage" class="mt-4 text-red-600 text-sm text-center hidden"></p>
-        <p id="successMessage" class="mt-4 text-green-600 text-sm text-center hidden"></p>
-
-        <div id="downloadArea" class="mt-6 text-center hidden">
-            <a
-                id="downloadLink"
-                download="posortowany_dokument.pdf"
-                class="inline-block py-3 px-6 rounded-lg shadow-md transition-colors duration-200 success-button"
-            >
-                Pobierz posortowany PDF
-            </a>
+        <!-- Obszar wiadomości i pobierania -->
+        <div id="messageArea" class="mt-6 text-center min-h-[60px] flex items-center justify-center">
+            <p id="errorMessage" class="text-red-400 text-base hidden font-semibold"></p>
+            <p id="successMessage" class="text-green-400 text-base hidden font-semibold"></p>
+            <div id="downloadArea" class="hidden">
+                 <a id="downloadLink" download="posortowany_dokument.pdf" class="action-button success-button">
+                    Pobierz Wynik
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
-        // Get references to DOM elements for Method A (Two files)
+        // --- DOM Element References ---
         const pdf1Input = document.getElementById('pdf1');
         const pdf2Input = document.getElementById('pdf2');
         const sortTwoFilesButton = document.getElementById('sortTwoFilesButton');
@@ -387,352 +278,179 @@
         const dropZonePdf2 = document.getElementById('dropZonePdf2');
         const fileNamePdf1 = document.getElementById('fileNamePdf1');
         const fileNamePdf2 = document.getElementById('fileNamePdf2');
-
-
-        // Get references to DOM elements for Method B (Single file)
         const singlePdfInput = document.getElementById('singlePdf');
         const sortSingleFileButton = document.getElementById('sortSingleFileButton');
         const dropZoneSinglePdf = document.getElementById('dropZoneSinglePdf');
         const fileNameSinglePdf = document.getElementById('fileNameSinglePdf');
-
-
-        // Get references to common UI elements
         const errorMessageElem = document.getElementById('errorMessage');
         const successMessageElem = document.getElementById('successMessage');
         const downloadArea = document.getElementById('downloadArea');
         const downloadLink = document.getElementById('downloadLink');
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
 
-
+        // --- State Variables ---
         let pdf1File = null;
         let pdf2File = null;
         let singlePdfFile = null;
 
-        /**
-         * Updates button states based on file selection.
-         * Resets button text and applies/removes Tailwind classes for styling.
-         * This function no longer hides success/error messages or download area.
-         */
+        // --- UI Update Functions ---
         function updateButtonStates() {
-            // Update state for Method A button
-            if (pdf1File && pdf2File) {
-                sortTwoFilesButton.disabled = false;
-                sortTwoFilesButton.classList.remove('bg-blue-300', 'cursor-not-allowed');
-                sortTwoFilesButton.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
-            } else {
-                sortTwoFilesButton.disabled = true;
-                sortTwoFilesButton.classList.add('bg-blue-300', 'cursor-not-allowed');
-                sortTwoFilesButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
-            }
-            sortTwoFilesButton.textContent = 'Sortuj dwa pliki PDF'; // Reset text
+            sortTwoFilesButton.disabled = !(pdf1File && pdf2File);
             fileNamePdf1.textContent = pdf1File ? pdf1File.name : '';
             fileNamePdf2.textContent = pdf2File ? pdf2File.name : '';
-
-
-            // Update state for Method B button
-            if (singlePdfFile) {
-                sortSingleFileButton.disabled = false;
-                sortSingleFileButton.classList.remove('bg-blue-300', 'cursor-not-allowed');
-                sortSingleFileButton.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
-            } else {
-                sortSingleFileButton.disabled = true;
-                sortSingleFileButton.classList.add('bg-blue-300', 'cursor-not-allowed');
-                sortSingleFileButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
-            }
-            sortSingleFileButton.textContent = 'Sortuj jeden plik PDF'; // Reset text
+            sortSingleFileButton.disabled = !singlePdfFile;
             fileNameSinglePdf.textContent = singlePdfFile ? singlePdfFile.name : '';
         }
-
-        /**
-         * Clears all messages and download link. This should be called when new files are selected
-         * or at the start of a new processing attempt.
-         */
-        function clearMessagesAndDownloadLink() {
+        
+        function showMessage(message, type) {
             errorMessageElem.classList.add('hidden');
             successMessageElem.classList.add('hidden');
             downloadArea.classList.add('hidden');
-            downloadLink.href = '#'; // Clear previous download link
+            if (type === 'error') {
+                errorMessageElem.textContent = message;
+                errorMessageElem.classList.remove('hidden');
+            } else if (type === 'success') {
+                successMessageElem.textContent = message;
+                successMessageElem.classList.remove('hidden');
+            }
+        }
+        
+        function clearMessages() {
+            errorMessageElem.classList.add('hidden');
+            successMessageElem.classList.add('hidden');
+            downloadArea.classList.add('hidden');
+            downloadLink.href = '#'; 
         }
 
-        /**
-         * Resets the inputs and files for Method A.
-         */
-        function resetMethodAInputs() {
-            pdf1Input.value = '';
-            pdf2Input.value = '';
-            pdf1File = null;
-            pdf2File = null;
-        }
-
-        /**
-         * Resets the input and file for Method B.
-         */
-        function resetMethodBInputs() {
-            singlePdfInput.value = '';
-            singlePdfFile = null;
-        }
-
-        // Event listeners for file inputs (Method A)
+        // --- Event Listeners for File Selection ---
         pdf1Input.addEventListener('change', (event) => {
             pdf1File = event.target.files[0];
-            resetMethodBInputs(); // Clear Method B inputs if Method A file is selected
-            clearMessagesAndDownloadLink(); // Clear messages on new file selection
+            singlePdfFile = null;
+            singlePdfInput.value = '';
+            clearMessages();
             updateButtonStates();
         });
-
         pdf2Input.addEventListener('change', (event) => {
             pdf2File = event.target.files[0];
-            resetMethodBInputs(); // Clear Method B inputs if Method A file is selected
-            clearMessagesAndDownloadLink(); // Clear messages on new file selection
+            singlePdfFile = null;
+            singlePdfInput.value = '';
+            clearMessages();
             updateButtonStates();
         });
-
-        // Event listener for file input (Method B)
         singlePdfInput.addEventListener('change', (event) => {
             singlePdfFile = event.target.files[0];
-            resetMethodAInputs(); // Clear Method A inputs if Method B file is selected
-            clearMessagesAndDownloadLink(); // Clear messages on new file selection
+            pdf1File = null;
+            pdf2File = null;
+            pdf1Input.value = '';
+            pdf2Input.value = '';
+            clearMessages();
             updateButtonStates();
         });
 
-        /**
-         * Generic drag event handlers for drop zones.
-         * @param {Event} event - The drag event.
-         */
-        function handleDragOver(event) {
-            event.preventDefault(); // Prevent default to allow drop
-            event.currentTarget.classList.add('drag-over');
-        }
-
-        function handleDragLeave(event) {
-            event.currentTarget.classList.remove('drag-over');
-        }
-
-        /**
-         * Handles the drop event for Method A, PDF 1.
-         * @param {Event} event - The drop event.
-         */
-        dropZonePdf1.addEventListener('dragover', handleDragOver);
-        dropZonePdf1.addEventListener('dragleave', handleDragLeave);
-        dropZonePdf1.addEventListener('drop', (event) => {
-            event.preventDefault();
-            event.currentTarget.classList.remove('drag-over');
-            const files = event.dataTransfer.files;
-            if (files.length > 0 && files[0].type === 'application/pdf') {
-                pdf1Input.files = files; // Assign files to the hidden input
-                pdf1File = files[0];
-                resetMethodBInputs();
-                clearMessagesAndDownloadLink(); // Clear messages on new file selection
-                updateButtonStates();
-            } else {
-                errorMessageElem.textContent = 'Proszę upuścić plik PDF.';
-                errorMessageElem.classList.remove('hidden');
-            }
-        });
-
-        /**
-         * Handles the drop event for Method A, PDF 2.
-         * @param {Event} event - The drop event.
-         */
-        dropZonePdf2.addEventListener('dragover', handleDragOver);
-        dropZonePdf2.addEventListener('dragleave', handleDragLeave);
-        dropZonePdf2.addEventListener('drop', (event) => {
-            event.preventDefault();
-            event.currentTarget.classList.remove('drag-over');
-            const files = event.dataTransfer.files;
-            if (files.length > 0 && files[0].type === 'application/pdf') {
-                pdf2Input.files = files; // Assign files to the hidden input
-                pdf2File = files[0];
-                resetMethodBInputs();
-                clearMessagesAndDownloadLink(); // Clear messages on new file selection
-                updateButtonStates();
-            } else {
-                errorMessageElem.textContent = 'Proszę upuścić plik PDF.';
-                errorMessageElem.classList.remove('hidden');
-            }
-        });
-
-        /**
-         * Handles the drop event for Method B, Single PDF.
-         * @param {Event} event - The drop event.
-         */
-        dropZoneSinglePdf.addEventListener('dragover', handleDragOver);
-        dropZoneSinglePdf.addEventListener('dragleave', handleDragLeave);
-        dropZoneSinglePdf.addEventListener('drop', (event) => {
-            event.preventDefault();
-            event.currentTarget.classList.remove('drag-over');
-            const files = event.dataTransfer.files;
-            if (files.length > 0 && files[0].type === 'application/pdf') {
-                singlePdfInput.files = files; // Assign files to the hidden input
-                singlePdfFile = files[0];
-                resetMethodAInputs();
-                clearMessagesAndDownloadLink(); // Clear messages on new file selection
-                updateButtonStates();
-            } else {
-                errorMessageElem.textContent = 'Proszę upuścić plik PDF.';
-                errorMessageElem.classList.remove('hidden');
-            }
-        });
-
-        /**
-         * Processes two PDF files (odd pages and reversed even pages) and interleaves them.
-         */
-        sortTwoFilesButton.addEventListener('click', async () => {
-            sortTwoFilesButton.textContent = 'Przetwarzanie...';
-            sortTwoFilesButton.disabled = true; // Disable button immediately
-            clearMessagesAndDownloadLink(); // Clear previous messages at start of processing
-
-            try {
-                if (!pdf1File || !pdf2File) {
-                    errorMessageElem.textContent = 'Proszę wgrać oba pliki PDF dla Metody A.';
-                    errorMessageElem.classList.remove('hidden');
-                    return;
+        // --- Drag and Drop Handlers ---
+        function setupDropZone(dropZone, input) {
+            dropZone.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                event.currentTarget.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', (event) => {
+                event.currentTarget.classList.remove('drag-over');
+            });
+            dropZone.addEventListener('drop', (event) => {
+                event.preventDefault();
+                event.currentTarget.classList.remove('drag-over');
+                const files = event.dataTransfer.files;
+                if (files.length > 0 && files[0].type === 'application/pdf') {
+                    input.files = files;
+                    input.dispatchEvent(new Event('change'));
+                } else {
+                    showMessage('Błąd Systemowy: Wymagany format pliku to PDF.', 'error');
                 }
+            });
+        }
+        setupDropZone(dropZonePdf1, pdf1Input);
+        setupDropZone(dropZonePdf2, pdf2Input);
+        setupDropZone(dropZoneSinglePdf, singlePdfInput);
 
+        // --- Core PDF Processing Logic ---
+        async function processFiles(button, task) {
+            const originalText = button.textContent;
+            button.textContent = 'Analiza Strumieni...';
+            button.disabled = true;
+            clearMessages();
+            try {
+                await task();
+            } catch (error) {
+                console.error('Błąd podczas przetwarzania PDF:', error);
+                showMessage(`Błąd Systemowy: ${error.message}` || 'Wystąpił nieznany błąd.', 'error');
+            } finally {
+                 button.textContent = originalText;
+                 updateButtonStates();
+            }
+        }
+
+        sortTwoFilesButton.addEventListener('click', () => {
+            processFiles(sortTwoFilesButton, async () => {
+                if (!pdf1File || !pdf2File) throw new Error('Wymagane dwa strumienie danych.');
                 const pdf1Bytes = await pdf1File.arrayBuffer();
                 const pdf2Bytes = await pdf2File.arrayBuffer();
+                const { PDFDocument } = PDFLib;
+                const pdf1Doc = await PDFDocument.load(pdf1Bytes);
+                const pdf2Doc = await PDFDocument.load(pdf2Bytes);
 
-                const pdf1Doc = await PDFLib.PDFDocument.load(pdf1Bytes);
-                const pdf2Doc = await PDFLib.PDFDocument.load(pdf2Bytes);
+                const numPages1 = pdf1Doc.getPageCount();
+                const numPages2 = pdf2Doc.getPageCount();
 
-                const numPages1 = pdf1Doc.getPages().length;
-                const numPages2 = pdf2Doc.getPages().length;
+                if (Math.abs(numPages1 - numPages2) > 1) throw new Error(`Niezgodność strumieni. Plik 1: ${numPages1} str., Plik 2: ${numPages2} str.`);
+                if (numPages1 < numPages2) throw new Error('Strumień frontowy nie może być krótszy niż rewersowy.');
 
-                if (numPages1 !== numPages2) {
-                    errorMessageElem.textContent = `Liczba stron w plikach PDF Metody A jest różna. Plik 1 ma ${numPages1} stron, a Plik 2 ma ${numPages2} stron. Proszę upewnić się, że każdy plik zawiera po tyle samo stron.`;
-                    errorMessageElem.classList.remove('hidden');
-                    return;
-                }
-
-                const newPdfDoc = await PDFLib.PDFDocument.create();
-
+                const newPdfDoc = await PDFDocument.create();
                 for (let i = 0; i < numPages1; i++) {
                     const [oddPage] = await newPdfDoc.copyPages(pdf1Doc, [i]);
                     newPdfDoc.addPage(oddPage);
-
-                    const evenPageIndexInPdf2 = numPages2 - 1 - i;
-                    const [evenPage] = await newPdfDoc.copyPages(pdf2Doc, [evenPageIndexInPdf2]);
-                    newPdfDoc.addPage(evenPage);
+                    if (i < numPages2) {
+                       const [evenPage] = await newPdfDoc.copyPages(pdf2Doc, [numPages2 - 1 - i]);
+                       newPdfDoc.addPage(evenPage);
+                    }
                 }
-
                 const pdfBytes = await newPdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-
-                downloadLink.href = url;
+                downloadLink.href = URL.createObjectURL(blob);
                 downloadArea.classList.remove('hidden');
-                successMessageElem.textContent = 'Plik PDF został pomyślnie posortowany Metodą A!';
-                successMessageElem.classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Błąd podczas przetwarzania PDF (Metoda A):', error);
-                errorMessageElem.textContent = 'Wystąpił błąd podczas przetwarzania plików PDF Metodą A. Upewnij się, że są to prawidłowe pliki PDF.';
-                errorMessageElem.classList.remove('hidden');
-            } finally {
-                updateButtonStates(); // Reset button text and state (only button, not messages/download link)
-            }
+                showMessage('Synchronizacja zakończona! Plik wynikowy jest gotowy.', 'success');
+            });
         });
 
-        /**
-         * Processes a single PDF file (odd pages then reversed even pages) and sorts it.
-         */
-        sortSingleFileButton.addEventListener('click', async () => {
-            sortSingleFileButton.textContent = 'Przetwarzanie...';
-            sortSingleFileButton.disabled = true; // Disable button immediately
-            clearMessagesAndDownloadLink(); // Clear previous messages at start of processing
-
-            try {
-                if (!singlePdfFile) {
-                    errorMessageElem.textContent = 'Proszę wgrać jeden plik PDF dla Metody B.';
-                    errorMessageElem.classList.remove('hidden');
-                    return;
-                }
-
+        sortSingleFileButton.addEventListener('click', () => {
+            processFiles(sortSingleFileButton, async () => {
+                if (!singlePdfFile) throw new Error('Wymagany scalony pakiet danych.');
                 const pdfBytes = await singlePdfFile.arrayBuffer();
-                const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                const { PDFDocument } = PDFLib;
+                const pdfDoc = await PDFDocument.load(pdfBytes);
+                const totalPages = pdfDoc.getPageCount();
+                if (totalPages < 2) throw new Error('Pakiet musi zawierać co najmniej 2 strony.');
+                
+                const newPdfDoc = await PDFDocument.create();
+                const oddPagesCount = Math.ceil(totalPages / 2);
+                const evenPagesCount = Math.floor(totalPages / 2);
 
-                const totalPages = pdfDoc.getPages().length;
-
-                // Validate that the total number of pages is even for duplex sorting
-                if (totalPages % 2 !== 0) {
-                    errorMessageElem.textContent = `Wgrany plik PDF Metody B musi zawierać parzystą liczbę stron (ma ${totalPages} stron).`;
-                    errorMessageElem.classList.remove('hidden');
-                    return;
-                }
-
-                const halfPages = totalPages / 2;
-                const newPdfDoc = await PDFLib.PDFDocument.create();
-
-                // Logic: first half pages are odd (1, 3, 5...), second half pages are even (26, 24, 22...) in reverse
-                // Example: 26 pages total, halfPages = 13
-                // Odd pages are at index 0 to 12
-                // Even pages are at index 13 to 25 (where index 13 is page 26, index 25 is page 2)
-                for (let i = 0; i < halfPages; i++) {
-                    // Add the odd page (from the first half of the original PDF)
+                for (let i = 0; i < oddPagesCount; i++) {
                     const [oddPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
                     newPdfDoc.addPage(oddPage);
-
-                    // Add the even page (from the second half of the original PDF, in reverse order)
-                    // The index for the even page from the original PDF is:
-                    // (start of even pages block) + (number of pages from end of even block)
-                    // halfPages + (halfPages - 1 - i)
-                    // For i=0, we need the last page of the original PDF: halfPages + halfPages - 1 = totalPages - 1
-                    // For i=1, we need the second to last: halfPages + halfPages - 2 = totalPages - 2
-                    // This simplifies to totalPages - 1 - i for the even page index.
-                    const evenPageIndexInOriginalPdf = totalPages - 1 - i;
-                    const [evenPage] = await newPdfDoc.copyPages(pdfDoc, [evenPageIndexInOriginalPdf]);
-                    newPdfDoc.addPage(evenPage);
+                    if (i < evenPagesCount) {
+                        const [evenPage] = await newPdfDoc.copyPages(pdfDoc, [totalPages - 1 - i]);
+                        newPdfDoc.addPage(evenPage);
+                    }
                 }
-
                 const sortedPdfBytes = await newPdfDoc.save();
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-
-                downloadLink.href = url;
+                const blob = new Blob([sortedPdfBytes], { type: 'application/pdf' });
+                downloadLink.href = URL.createObjectURL(blob);
                 downloadArea.classList.remove('hidden');
-                successMessageElem.textContent = 'Plik PDF został pomyślnie posortowany Metodą B!';
-                successMessageElem.classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Błąd podczas przetwarzania PDF (Metoda B):', error);
-                errorMessageElem.textContent = 'Wystąpił błąd podczas przetwarzania pliku PDF Metodą B. Upewnij się, że to prawidłowy plik PDF o parzystej liczbie stron.';
-                errorMessageElem.classList.remove('hidden');
-            } finally {
-                updateButtonStates(); // Reset button text and state (only button, not messages/download link)
-            }
+                showMessage('Sortowanie zakończone! Plik wynikowy jest gotowy.', 'success');
+            });
         });
 
-        // Theme toggle logic
-        themeToggle.addEventListener('change', () => {
-            if (themeToggle.checked) {
-                body.classList.remove('dark');
-                body.classList.add('light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.classList.remove('light');
-                body.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-
-        // Set initial theme based on localStorage or default to dark
-        function setInitialTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                body.classList.remove('dark');
-                body.classList.add('light');
-                themeToggle.checked = true;
-            } else {
-                body.classList.remove('light');
-                body.classList.add('dark');
-                themeToggle.checked = false;
-            }
-        }
-
-        // Initialize button state and theme on page load
+        // --- Initialisation ---
         updateButtonStates();
-        setInitialTheme();
     </script>
 </body>
 </html>
