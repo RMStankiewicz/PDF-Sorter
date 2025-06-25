@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,34 +8,266 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Font - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Font - Rajdhani for futuristic feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- pdf-lib CDN for PDF manipulation -->
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
     <!-- Favicon / Logo for the browser tab -->
     <link rel="icon" href="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo" type="image/png">
     <style>
+        /* Base styles for dark mode */
         body {
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        /* Custom styles for drag and drop feedback */
-        .drag-over {
-            border-color: #3b82f6 !important; /* Blue-500 */
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Blue-500 with transparency */
+
+        .dark body {
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9; /* Light text */
+        }
+
+        .dark .bg-white {
+            background-color: #161b22; /* Slightly lighter dark for card */
+            border: 1px solid #30363d;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .dark h1, .dark h2, .dark label {
+            color: #e6edf3;
+        }
+
+        .dark p {
+            color: #a7adba;
+        }
+
+        .dark .border-gray-200 {
+            border-color: #30363d;
+        }
+
+        .dark .border-gray-300 {
+            border-color: #30363d;
+        }
+
+        .dark .file-input-wrapper label {
+            background-color: #004d99; /* Darker blue for dark mode */
+            color: #e6edf3;
+        }
+        .dark .file-input-wrapper label:hover {
+            background-color: #005cb3;
+        }
+
+        .dark .drop-zone {
+            background-color: #0d1117; /* Darker background for drop zone */
+            border-color: #444c56;
+        }
+        .dark .drop-zone.drag-over {
+            border-color: #58a6ff !important;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.5);
+        }
+        .dark .drop-zone p {
+            color: #8b949e;
+        }
+        .dark .drop-zone span {
+            color: #8b949e;
+        }
+
+
+        /* Styles for light mode (overrides dark mode) */
+        .light body {
+            background-color: #f0f2f5; /* Light background */
+            color: #333; /* Dark text */
+        }
+        .light .bg-white {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .light h1, .light h2, .light label {
+            color: #222;
+        }
+        .light p {
+            color: #555;
+        }
+        .light .border-gray-200 {
+            border-color: #e0e0e0;
+        }
+        .light .border-gray-300 {
+            border-color: #ccc;
+        }
+
+        .light .file-input-wrapper label {
+            background-color: #3b82f6; /* Standard blue for light mode */
+            color: white;
+        }
+        .light .file-input-wrapper label:hover {
+            background-color: #2563eb;
+        }
+
+        .light .drop-zone {
+            background-color: #ffffff;
+            border-color: #ccc;
+        }
+        .light .drop-zone.drag-over {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .light .drop-zone p {
+            color: #666;
+        }
+        .light .drop-zone span {
+            color: #666;
+        }
+
+        /* Common styles for buttons and elements */
+        button {
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:disabled {
+            background-color: #4a5568 !important; /* bg-gray-600 for dark, gray-300 for light */
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .dark button:disabled {
+            background-color: #333a42 !important;
+            color: #8b949e;
+        }
+        .light button:disabled {
+            background-color: #cbd5e0 !important;
+            color: #718096;
+        }
+
+        /* Specific button styles */
+        .primary-button {
+            background-color: #007bff; /* A vibrant blue */
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        .primary-button:not(:disabled):hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+        }
+
+        .success-button {
+            background-color: #28a745; /* A vibrant green */
+            color: white;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        .success-button:not(:disabled):hover {
+            background-color: #1e7e34;
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        /* RS Projects specific styling */
+        #rs-projects-text {
+            font-family: 'Rajdhani', sans-serif; /* Futuristic font */
+            font-size: 1.5rem; /* Larger font size */
+            font-weight: 700;
+            letter-spacing: 0.1em; /* Increased letter spacing */
+            margin-top: -5px; /* Adjust vertical alignment with logo */
+        }
+        .dark #rs-projects-text {
+            color: #00d4ff; /* Bright cyan for dark mode */
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.6); /* Subtle glow */
+        }
+        .light #rs-projects-text {
+            color: #007bff; /* Consistent blue for light mode */
+            text-shadow: none;
+        }
+
+        /* Theme toggle switch styling */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-left: auto; /* Push to the right */
+            margin-top: -10px; /* Adjust vertical position */
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
         }
     </style>
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl"> <!-- Increased max-width for side-by-side layout -->
-        <div class="flex items-center justify-center mb-6">
-            <!-- Logo image added here -->
-            <img src="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo"
-                 alt="Logo"
-                 class="w-16 h-16 rounded-full mr-4 object-cover"
-                 onerror="this.onerror=null;this.src='https://placehold.co/64x64/cccccc/333333?text=Logo';"
-            >
-            <h1 class="text-3xl font-bold text-center text-gray-800">
-                Sortowanie dwustronnych PDF
-            </h1>
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl">
+        <div class="flex flex-col md:flex-row items-center justify-center mb-6 relative">
+            <div class="flex items-center justify-center md:mr-auto mb-4 md:mb-0">
+                <!-- Logo image -->
+                <img src="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo"
+                     alt="Logo"
+                     class="w-16 h-16 rounded-full mr-4 object-cover"
+                     onerror="this.onerror=null;this.src='https://placehold.co/64x64/cccccc/333333?text=Logo';"
+                >
+                <div class="flex flex-col items-center md:items-start">
+                    <h1 class="text-3xl font-bold text-center md:text-left text-gray-800">
+                        Sortowanie dwustronnych PDF
+                    </h1>
+                    <span id="rs-projects-text" class="text-gray-700 mt-1">RS PROJECTS</span>
+                </div>
+            </div>
+
+            <!-- Theme Toggle Switch -->
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider round"></span>
+            </label>
         </div>
+
         <p class="text-gray-600 text-center mb-6">
             Wybierz jedną z poniższych metod sortowania. Możesz także przeciągać i upuszczać pliki.
         </p>
@@ -48,11 +280,11 @@
                     Wgraj dwa pliki: jeden ze stronami nieparzystymi (po kolei) i drugi ze stronami parzystymi (od tyłu).
                 </p>
 
-                <div class="mb-4">
+                <div class="mb-4 file-input-wrapper">
                     <label for="pdf1" class="block text-gray-700 text-sm font-semibold mb-2">
                         Plik PDF 1 (strony nieparzyste, po kolei):
                     </label>
-                    <div id="dropZonePdf1" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
+                    <div id="dropZonePdf1" class="drop-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
                         <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
                         <input
                             type="file"
@@ -67,11 +299,11 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div class="mb-6 file-input-wrapper">
                     <label for="pdf2" class="block text-gray-700 text-sm font-semibold mb-2">
                         Plik PDF 2 (strony parzyste, od tyłu):
                     </label>
-                    <div id="dropZonePdf2" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
+                    <div id="dropZonePdf2" class="drop-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
                         <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
                         <input
                             type="file"
@@ -89,7 +321,7 @@
                 <button
                     id="sortTwoFilesButton"
                     disabled
-                    class="w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors duration-200 bg-blue-300 cursor-not-allowed"
+                    class="w-full py-3 px-4 primary-button"
                 >
                     Sortuj dwa pliki PDF
                 </button>
@@ -102,11 +334,11 @@
                     Wgraj jeden plik PDF, który zawiera strony nieparzyste (po kolei), a następnie strony parzyste (od tyłu).
                 </p>
 
-                <div class="mb-6">
+                <div class="mb-6 file-input-wrapper">
                     <label for="singlePdf" class="block text-gray-700 text-sm font-semibold mb-2">
                         Jeden plik PDF (scalony i do posortowania):
                     </label>
-                    <div id="dropZoneSinglePdf" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
+                    <div id="dropZoneSinglePdf" class="drop-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
                         <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
                         <input
                             type="file"
@@ -124,7 +356,7 @@
                 <button
                     id="sortSingleFileButton"
                     disabled
-                    class="w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors duration-200 bg-blue-300 cursor-not-allowed"
+                    class="w-full py-3 px-4 primary-button"
                 >
                     Sortuj jeden plik PDF
                 </button>
@@ -139,7 +371,7 @@
             <a
                 id="downloadLink"
                 download="posortowany_dokument.pdf"
-                class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200"
+                class="inline-block py-3 px-6 rounded-lg shadow-md transition-colors duration-200 success-button"
             >
                 Pobierz posortowany PDF
             </a>
@@ -169,6 +401,9 @@
         const successMessageElem = document.getElementById('successMessage');
         const downloadArea = document.getElementById('downloadArea');
         const downloadLink = document.getElementById('downloadLink');
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
 
         let pdf1File = null;
         let pdf2File = null;
@@ -451,7 +686,7 @@
                 }
 
                 const sortedPdfBytes = await newPdfDoc.save();
-                const blob = new Blob([sortedPdfBytes], { type: 'application/pdf' });
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                 const url = URL.createObjectURL(blob);
 
                 downloadLink.href = url;
@@ -468,8 +703,36 @@
             }
         });
 
-        // Initialize button state on page load
+        // Theme toggle logic
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                body.classList.remove('dark');
+                body.classList.add('light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light');
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Set initial theme based on localStorage or default to dark
+        function setInitialTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                body.classList.remove('dark');
+                body.classList.add('light');
+                themeToggle.checked = true;
+            } else {
+                body.classList.remove('light');
+                body.classList.add('dark');
+                themeToggle.checked = false;
+            }
+        }
+
+        // Initialize button state and theme on page load
         updateButtonStates();
+        setInitialTheme();
     </script>
 </body>
 </html>
