@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortowanie Dwustronnych PDF</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- pdf-lib CDN for PDF manipulation -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <!-- Favicon / Logo for the browser tab -->
+    <link rel="icon" href="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo" type="image/png">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for drag and drop feedback */
+        .drag-over {
+            border-color: #3b82f6 !important; /* Blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Blue-500 with transparency */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl"> <!-- Increased max-width for side-by-side layout -->
+        <div class="flex items-center justify-center mb-6">
+            <!-- Logo image added here -->
+            <img src="https://yt3.ggpht.com/ngn-9Dc6-sRhEOjNglyYu3M_xcXEjm8a569VvH8ZxHHQ1gjZ_KacvIXPyz41zkYLAtVxNIR4pyA=s600-c-k-c0x00ffffff-no-rj-rp-mo"
+                 alt="Logo"
+                 class="w-16 h-16 rounded-full mr-4 object-cover"
+                 onerror="this.onerror=null;this.src='https://placehold.co/64x64/cccccc/333333?text=Logo';"
+            >
+            <h1 class="text-3xl font-bold text-center text-gray-800">
+                Sortowanie dwustronnych PDF
+            </h1>
+        </div>
+        <p class="text-gray-600 text-center mb-6">
+            Wybierz jedną z poniższych metod sortowania. Możesz także przeciągać i upuszczać pliki.
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Sekcja sortowania dwóch plików PDF (Metoda A) -->
+            <div class="border border-gray-200 rounded-xl p-6 flex-1">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Metoda A: Dwa pliki PDF</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    Wgraj dwa pliki: jeden ze stronami nieparzystymi (po kolei) i drugi ze stronami parzystymi (od tyłu).
+                </p>
+
+                <div class="mb-4">
+                    <label for="pdf1" class="block text-gray-700 text-sm font-semibold mb-2">
+                        Plik PDF 1 (strony nieparzyste, po kolei):
+                    </label>
+                    <div id="dropZonePdf1" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
+                        <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
+                        <input
+                            type="file"
+                            id="pdf1"
+                            accept=".pdf"
+                            class="hidden"
+                        />
+                        <label for="pdf1" class="inline-block bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600 transition-colors duration-200">
+                            Wybierz plik
+                        </label>
+                        <span id="fileNamePdf1" class="block text-sm text-gray-600 mt-2"></span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="pdf2" class="block text-gray-700 text-sm font-semibold mb-2">
+                        Plik PDF 2 (strony parzyste, od tyłu):
+                    </label>
+                    <div id="dropZonePdf2" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
+                        <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
+                        <input
+                            type="file"
+                            id="pdf2"
+                            accept=".pdf"
+                            class="hidden"
+                        />
+                        <label for="pdf2" class="inline-block bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600 transition-colors duration-200">
+                            Wybierz plik
+                        </label>
+                        <span id="fileNamePdf2" class="block text-sm text-gray-600 mt-2"></span>
+                    </div>
+                </div>
+
+                <button
+                    id="sortTwoFilesButton"
+                    disabled
+                    class="w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors duration-200 bg-blue-300 cursor-not-allowed"
+                >
+                    Sortuj dwa pliki PDF
+                </button>
+            </div>
+
+            <!-- Sekcja sortowania jednego pliku PDF (Metoda B) -->
+            <div class="border border-gray-200 rounded-xl p-6 flex-1">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Metoda B: Jeden plik PDF</h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    Wgraj jeden plik PDF, który zawiera strony nieparzyste (po kolei), a następnie strony parzyste (od tyłu).
+                </p>
+
+                <div class="mb-6">
+                    <label for="singlePdf" class="block text-gray-700 text-sm font-semibold mb-2">
+                        Jeden plik PDF (scalony i do posortowania):
+                    </label>
+                    <div id="dropZoneSinglePdf" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors duration-200">
+                        <p class="text-gray-500 mb-2">Przeciągnij i upuść plik PDF tutaj</p>
+                        <input
+                            type="file"
+                            id="singlePdf"
+                            accept=".pdf"
+                            class="hidden"
+                        />
+                        <label for="singlePdf" class="inline-block bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600 transition-colors duration-200">
+                            Wybierz plik
+                        </label>
+                        <span id="fileNameSinglePdf" class="block text-sm text-gray-600 mt-2"></span>
+                    </div>
+                </div>
+
+                <button
+                    id="sortSingleFileButton"
+                    disabled
+                    class="w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors duration-200 bg-blue-300 cursor-not-allowed"
+                >
+                    Sortuj jeden plik PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Obszar wiadomości i pobierania (wspólny dla obu metod) -->
+        <p id="errorMessage" class="mt-4 text-red-600 text-sm text-center hidden"></p>
+        <p id="successMessage" class="mt-4 text-green-600 text-sm text-center hidden"></p>
+
+        <div id="downloadArea" class="mt-6 text-center hidden">
+            <a
+                id="downloadLink"
+                download="posortowany_dokument.pdf"
+                class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200"
+            >
+                Pobierz posortowany PDF
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements for Method A (Two files)
+        const pdf1Input = document.getElementById('pdf1');
+        const pdf2Input = document.getElementById('pdf2');
+        const sortTwoFilesButton = document.getElementById('sortTwoFilesButton');
+        const dropZonePdf1 = document.getElementById('dropZonePdf1');
+        const dropZonePdf2 = document.getElementById('dropZonePdf2');
+        const fileNamePdf1 = document.getElementById('fileNamePdf1');
+        const fileNamePdf2 = document.getElementById('fileNamePdf2');
+
+
+        // Get references to DOM elements for Method B (Single file)
+        const singlePdfInput = document.getElementById('singlePdf');
+        const sortSingleFileButton = document.getElementById('sortSingleFileButton');
+        const dropZoneSinglePdf = document.getElementById('dropZoneSinglePdf');
+        const fileNameSinglePdf = document.getElementById('fileNameSinglePdf');
+
+
+        // Get references to common UI elements
+        const errorMessageElem = document.getElementById('errorMessage');
+        const successMessageElem = document.getElementById('successMessage');
+        const downloadArea = document.getElementById('downloadArea');
+        const downloadLink = document.getElementById('downloadLink');
+
+        let pdf1File = null;
+        let pdf2File = null;
+        let singlePdfFile = null;
+
+        /**
+         * Updates button states based on file selection.
+         * Resets button text and applies/removes Tailwind classes for styling.
+         * This function no longer hides success/error messages or download area.
+         */
+        function updateButtonStates() {
+            // Update state for Method A button
+            if (pdf1File && pdf2File) {
+                sortTwoFilesButton.disabled = false;
+                sortTwoFilesButton.classList.remove('bg-blue-300', 'cursor-not-allowed');
+                sortTwoFilesButton.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
+            } else {
+                sortTwoFilesButton.disabled = true;
+                sortTwoFilesButton.classList.add('bg-blue-300', 'cursor-not-allowed');
+                sortTwoFilesButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
+            }
+            sortTwoFilesButton.textContent = 'Sortuj dwa pliki PDF'; // Reset text
+            fileNamePdf1.textContent = pdf1File ? pdf1File.name : '';
+            fileNamePdf2.textContent = pdf2File ? pdf2File.name : '';
+
+
+            // Update state for Method B button
+            if (singlePdfFile) {
+                sortSingleFileButton.disabled = false;
+                sortSingleFileButton.classList.remove('bg-blue-300', 'cursor-not-allowed');
+                sortSingleFileButton.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
+            } else {
+                sortSingleFileButton.disabled = true;
+                sortSingleFileButton.classList.add('bg-blue-300', 'cursor-not-allowed');
+                sortSingleFileButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'shadow-md');
+            }
+            sortSingleFileButton.textContent = 'Sortuj jeden plik PDF'; // Reset text
+            fileNameSinglePdf.textContent = singlePdfFile ? singlePdfFile.name : '';
+        }
+
+        /**
+         * Clears all messages and download link. This should be called when new files are selected
+         * or at the start of a new processing attempt.
+         */
+        function clearMessagesAndDownloadLink() {
+            errorMessageElem.classList.add('hidden');
+            successMessageElem.classList.add('hidden');
+            downloadArea.classList.add('hidden');
+            downloadLink.href = '#'; // Clear previous download link
+        }
+
+        /**
+         * Resets the inputs and files for Method A.
+         */
+        function resetMethodAInputs() {
+            pdf1Input.value = '';
+            pdf2Input.value = '';
+            pdf1File = null;
+            pdf2File = null;
+        }
+
+        /**
+         * Resets the input and file for Method B.
+         */
+        function resetMethodBInputs() {
+            singlePdfInput.value = '';
+            singlePdfFile = null;
+        }
+
+        // Event listeners for file inputs (Method A)
+        pdf1Input.addEventListener('change', (event) => {
+            pdf1File = event.target.files[0];
+            resetMethodBInputs(); // Clear Method B inputs if Method A file is selected
+            clearMessagesAndDownloadLink(); // Clear messages on new file selection
+            updateButtonStates();
+        });
+
+        pdf2Input.addEventListener('change', (event) => {
+            pdf2File = event.target.files[0];
+            resetMethodBInputs(); // Clear Method B inputs if Method A file is selected
+            clearMessagesAndDownloadLink(); // Clear messages on new file selection
+            updateButtonStates();
+        });
+
+        // Event listener for file input (Method B)
+        singlePdfInput.addEventListener('change', (event) => {
+            singlePdfFile = event.target.files[0];
+            resetMethodAInputs(); // Clear Method A inputs if Method B file is selected
+            clearMessagesAndDownloadLink(); // Clear messages on new file selection
+            updateButtonStates();
+        });
+
+        /**
+         * Generic drag event handlers for drop zones.
+         * @param {Event} event - The drag event.
+         */
+        function handleDragOver(event) {
+            event.preventDefault(); // Prevent default to allow drop
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        /**
+         * Handles the drop event for Method A, PDF 1.
+         * @param {Event} event - The drop event.
+         */
+        dropZonePdf1.addEventListener('dragover', handleDragOver);
+        dropZonePdf1.addEventListener('dragleave', handleDragLeave);
+        dropZonePdf1.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                pdf1Input.files = files; // Assign files to the hidden input
+                pdf1File = files[0];
+                resetMethodBInputs();
+                clearMessagesAndDownloadLink(); // Clear messages on new file selection
+                updateButtonStates();
+            } else {
+                errorMessageElem.textContent = 'Proszę upuścić plik PDF.';
+                errorMessageElem.classList.remove('hidden');
+            }
+        });
+
+        /**
+         * Handles the drop event for Method A, PDF 2.
+         * @param {Event} event - The drop event.
+         */
+        dropZonePdf2.addEventListener('dragover', handleDragOver);
+        dropZonePdf2.addEventListener('dragleave', handleDragLeave);
+        dropZonePdf2.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                pdf2Input.files = files; // Assign files to the hidden input
+                pdf2File = files[0];
+                resetMethodBInputs();
+                clearMessagesAndDownloadLink(); // Clear messages on new file selection
+                updateButtonStates();
+            } else {
+                errorMessageElem.textContent = 'Proszę upuścić plik PDF.';
+                errorMessageElem.classList.remove('hidden');
+            }
+        });
+
+        /**
+         * Handles the drop event for Method B, Single PDF.
+         * @param {Event} event - The drop event.
+         */
+        dropZoneSinglePdf.addEventListener('dragover', handleDragOver);
+        dropZoneSinglePdf.addEventListener('dragleave', handleDragLeave);
+        dropZoneSinglePdf.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            const files = event.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                singlePdfInput.files = files; // Assign files to the hidden input
+                singlePdfFile = files[0];
+                resetMethodAInputs();
+                clearMessagesAndDownloadLink(); // Clear messages on new file selection
+                updateButtonStates();
+            } else {
+                errorMessageElem.textContent = 'Proszę upuścić plik PDF.';
+                errorMessageElem.classList.remove('hidden');
+            }
+        });
+
+        /**
+         * Processes two PDF files (odd pages and reversed even pages) and interleaves them.
+         */
+        sortTwoFilesButton.addEventListener('click', async () => {
+            sortTwoFilesButton.textContent = 'Przetwarzanie...';
+            sortTwoFilesButton.disabled = true; // Disable button immediately
+            clearMessagesAndDownloadLink(); // Clear previous messages at start of processing
+
+            try {
+                if (!pdf1File || !pdf2File) {
+                    errorMessageElem.textContent = 'Proszę wgrać oba pliki PDF dla Metody A.';
+                    errorMessageElem.classList.remove('hidden');
+                    return;
+                }
+
+                const pdf1Bytes = await pdf1File.arrayBuffer();
+                const pdf2Bytes = await pdf2File.arrayBuffer();
+
+                const pdf1Doc = await PDFLib.PDFDocument.load(pdf1Bytes);
+                const pdf2Doc = await PDFLib.PDFDocument.load(pdf2Bytes);
+
+                const numPages1 = pdf1Doc.getPages().length;
+                const numPages2 = pdf2Doc.getPages().length;
+
+                if (numPages1 !== numPages2) {
+                    errorMessageElem.textContent = `Liczba stron w plikach PDF Metody A jest różna. Plik 1 ma ${numPages1} stron, a Plik 2 ma ${numPages2} stron. Proszę upewnić się, że każdy plik zawiera po tyle samo stron.`;
+                    errorMessageElem.classList.remove('hidden');
+                    return;
+                }
+
+                const newPdfDoc = await PDFLib.PDFDocument.create();
+
+                for (let i = 0; i < numPages1; i++) {
+                    const [oddPage] = await newPdfDoc.copyPages(pdf1Doc, [i]);
+                    newPdfDoc.addPage(oddPage);
+
+                    const evenPageIndexInPdf2 = numPages2 - 1 - i;
+                    const [evenPage] = await newPdfDoc.copyPages(pdf2Doc, [evenPageIndexInPdf2]);
+                    newPdfDoc.addPage(evenPage);
+                }
+
+                const pdfBytes = await newPdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+
+                downloadLink.href = url;
+                downloadArea.classList.remove('hidden');
+                successMessageElem.textContent = 'Plik PDF został pomyślnie posortowany Metodą A!';
+                successMessageElem.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Błąd podczas przetwarzania PDF (Metoda A):', error);
+                errorMessageElem.textContent = 'Wystąpił błąd podczas przetwarzania plików PDF Metodą A. Upewnij się, że są to prawidłowe pliki PDF.';
+                errorMessageElem.classList.remove('hidden');
+            } finally {
+                updateButtonStates(); // Reset button text and state (only button, not messages/download link)
+            }
+        });
+
+        /**
+         * Processes a single PDF file (odd pages then reversed even pages) and sorts it.
+         */
+        sortSingleFileButton.addEventListener('click', async () => {
+            sortSingleFileButton.textContent = 'Przetwarzanie...';
+            sortSingleFileButton.disabled = true; // Disable button immediately
+            clearMessagesAndDownloadLink(); // Clear previous messages at start of processing
+
+            try {
+                if (!singlePdfFile) {
+                    errorMessageElem.textContent = 'Proszę wgrać jeden plik PDF dla Metody B.';
+                    errorMessageElem.classList.remove('hidden');
+                    return;
+                }
+
+                const pdfBytes = await singlePdfFile.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+
+                const totalPages = pdfDoc.getPages().length;
+
+                // Validate that the total number of pages is even for duplex sorting
+                if (totalPages % 2 !== 0) {
+                    errorMessageElem.textContent = `Wgrany plik PDF Metody B musi zawierać parzystą liczbę stron (ma ${totalPages} stron).`;
+                    errorMessageElem.classList.remove('hidden');
+                    return;
+                }
+
+                const halfPages = totalPages / 2;
+                const newPdfDoc = await PDFLib.PDFDocument.create();
+
+                // Logic: first half pages are odd (1, 3, 5...), second half pages are even (26, 24, 22...) in reverse
+                // Example: 26 pages total, halfPages = 13
+                // Odd pages are at index 0 to 12
+                // Even pages are at index 13 to 25 (where index 13 is page 26, index 25 is page 2)
+                for (let i = 0; i < halfPages; i++) {
+                    // Add the odd page (from the first half of the original PDF)
+                    const [oddPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
+                    newPdfDoc.addPage(oddPage);
+
+                    // Add the even page (from the second half of the original PDF, in reverse order)
+                    // The index for the even page from the original PDF is:
+                    // (start of even pages block) + (number of pages from end of even block)
+                    // halfPages + (halfPages - 1 - i)
+                    // For i=0, we need the last page of the original PDF: halfPages + halfPages - 1 = totalPages - 1
+                    // For i=1, we need the second to last: halfPages + halfPages - 2 = totalPages - 2
+                    // This simplifies to totalPages - 1 - i for the even page index.
+                    const evenPageIndexInOriginalPdf = totalPages - 1 - i;
+                    const [evenPage] = await newPdfDoc.copyPages(pdfDoc, [evenPageIndexInOriginalPdf]);
+                    newPdfDoc.addPage(evenPage);
+                }
+
+                const sortedPdfBytes = await newPdfDoc.save();
+                const blob = new Blob([sortedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+
+                downloadLink.href = url;
+                downloadArea.classList.remove('hidden');
+                successMessageElem.textContent = 'Plik PDF został pomyślnie posortowany Metodą B!';
+                successMessageElem.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Błąd podczas przetwarzania PDF (Metoda B):', error);
+                errorMessageElem.textContent = 'Wystąpił błąd podczas przetwarzania pliku PDF Metodą B. Upewnij się, że to prawidłowy plik PDF o parzystej liczbie stron.';
+                errorMessageElem.classList.remove('hidden');
+            } finally {
+                updateButtonStates(); // Reset button text and state (only button, not messages/download link)
+            }
+        });
+
+        // Initialize button state on page load
+        updateButtonStates();
+    </script>
+</body>
+</html>
