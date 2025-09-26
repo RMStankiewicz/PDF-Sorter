@@ -408,7 +408,7 @@
                     const [oddPage] = await newPdfDoc.copyPages(pdf1Doc, [i]);
                     newPdfDoc.addPage(oddPage);
                     if (i < numPages2) {
-                       const [evenPage] = await newPdfDoc.copyPages(pdf2Doc, [numPages2 - 1 - i]);
+                       const [evenPage] = await newPdfDoc.copyPages(pdf2Doc, [i]);
                        newPdfDoc.addPage(evenPage);
                     }
                 }
@@ -436,8 +436,9 @@
                 for (let i = 0; i < oddPagesCount; i++) {
                     const [oddPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
                     newPdfDoc.addPage(oddPage);
-                    if (i < evenPagesCount) {
-                        const [evenPage] = await newPdfDoc.copyPages(pdfDoc, [totalPages - 1 - i]);
+                    const evenPageIndex = oddPagesCount + i;
+                    if (evenPageIndex < totalPages) {
+                        const [evenPage] = await newPdfDoc.copyPages(pdfDoc, [evenPageIndex]);
                         newPdfDoc.addPage(evenPage);
                     }
                 }
