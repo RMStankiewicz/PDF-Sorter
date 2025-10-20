@@ -51,7 +51,7 @@
             animation: gradient-animation 15s ease infinite;
             z-index: 0;
         }
-        
+
         @keyframes gradient-animation {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -83,7 +83,7 @@
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 15px rgba(230, 110, 188, 0.3);
         }
-        
+
         #rs-projects-text {
             font-family: var(--font-display);
             font-weight: 700;
@@ -123,7 +123,7 @@
             background-color: rgba(230, 110, 188, 0.1);
             box-shadow: 0 0 15px rgba(230, 110, 188, 0.3);
         }
-        
+
         /* Button styling */
         .action-button {
             font-family: var(--font-display); /* Bold, futuristic font for buttons */
@@ -136,7 +136,7 @@
             transition: all 0.3s ease;
             border: none;
         }
-        
+
         .primary-button {
             background: linear-gradient(90deg, var(--primary-glow-color), var(--secondary-glow-color));
             box-shadow: 0 0 10px rgba(95, 114, 255, 0.4), 0 0 10px rgba(230, 110, 188, 0.4);
@@ -151,7 +151,7 @@
             cursor: not-allowed;
             box-shadow: none;
         }
-        
+
         .success-button {
             background: linear-gradient(90deg, #10b981, #34d399);
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
@@ -261,7 +261,7 @@
         <div id="messageArea" class="mt-6 text-center min-h-[60px] flex items-center justify-center">
             <p id="errorMessage" class="text-red-400 text-base hidden font-semibold"></p>
             <p id="successMessage" class="text-green-400 text-base hidden font-semibold"></p>
-            <div id="downloadArea" class="hidden">
+            <div id="downloadArea" class="hidden" style="position: relative; z-index: 10;">
                  <a id="downloadLink" download="posortowany_dokument.pdf" class="action-button success-button">
                     Pobierz Wynik
                 </a>
@@ -300,11 +300,10 @@
             sortSingleFileButton.disabled = !singlePdfFile;
             fileNameSinglePdf.textContent = singlePdfFile ? singlePdfFile.name : '';
         }
-        
+
         function showMessage(message, type) {
             errorMessageElem.classList.add('hidden');
             successMessageElem.classList.add('hidden');
-            downloadArea.classList.add('hidden');
             if (type === 'error') {
                 errorMessageElem.textContent = message;
                 errorMessageElem.classList.remove('hidden');
@@ -313,12 +312,12 @@
                 successMessageElem.classList.remove('hidden');
             }
         }
-        
+
         function clearMessages() {
             errorMessageElem.classList.add('hidden');
             successMessageElem.classList.add('hidden');
             downloadArea.classList.add('hidden');
-            downloadLink.href = '#'; 
+            downloadLink.href = '#';
         }
 
         // --- Event Listeners for File Selection ---
@@ -428,7 +427,7 @@
                 const pdfDoc = await PDFDocument.load(pdfBytes);
                 const totalPages = pdfDoc.getPageCount();
                 if (totalPages < 2) throw new Error('Pakiet musi zawierać co najmniej 2 strony.');
-                
+
                 const newPdfDoc = await PDFDocument.create();
                 const oddPagesCount = Math.ceil(totalPages / 2);
                 const evenPagesCount = Math.floor(totalPages / 2);
